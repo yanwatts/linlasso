@@ -42,9 +42,9 @@ The LL function requires minimally the following input :
 
 The following is an example of the LL function used for the diabetes dataset introduced by Efron et al. (2004). The output will help us understand how to interpret the Linear Lasso algorithm. 
 
-***First step*** : LL eliminates predictors based on their correlation with the response variable
+**First step** : LL eliminates predictors based on their correlation with the response variable
 
-***Second step (One-by-one procedure)*** : LL eliminates variables based on the one-by-one procedure
+**Second step (One-by-one procedure)** : LL eliminates variables based on the one-by-one procedure
 
 ```R
 > model.LL = LL(y = diabetes[,11], x = diabetes[,-11], K = 13, L = 50)
