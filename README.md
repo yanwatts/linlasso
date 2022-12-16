@@ -43,13 +43,21 @@ The LL function requires minimally the following input :
 The following is an example of the LL function used for the diabetes dataset introduced by Efron et al. (2004). The output will help us understand how to interpret the Linear Lasso algorithm. 
 
 ***First step*** : It eliminates variables based on their correlation with the response variable
+
 ***Second step (One-by-one procedure)*** : It eliminates variables based on the one-by-one procedure
 
 ```R
 > model.LL = LL(y = diabetes[,11], x = diabetes[,-11], K = 13, L = 50)
 [1] "Variables left after cutoff = 0.2 : BMI + BP + S1 + S3 + S4 + S5 + S6"
 ```
-The variables left after the first step based on the default cutoff ```gamma = 0.2``` are ```BMI```, ```BP```, ```S1```, ```S3```, ```S4```, ```S5``` and ```S6``` 
+The variables left after the first step based on the default cutoff ```gamma = 0.2``` are ```BMI```, ```BP```, ```S1```, ```S3```, ```S4```, ```S5``` and ```S6```. The model gives us 
+
+```R
+> model.LL$c.pos
+      BMI        S5        BP        S4        S3        S6        S1       AGE        S2       SEX 
+0.5864501 0.5658826 0.4414818 0.4304529 0.3947893 0.3824835 0.2120225 0.1878888 0.1740536 0.0430620 
+```
+
 
 ```R
 > model.LL
