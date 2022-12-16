@@ -26,7 +26,7 @@ To use the Lineal Lasso in linear regression, the LL function is available by sp
 LL(y, x, gamma = 0.2, K = 10, L = 10, cor.only = F, plot = F)
 ```
 
-### Input 
+## Input 
 
 The LL function requires minimally the following input :
 
@@ -42,15 +42,16 @@ The LL function requires minimally the following input :
 
 The following is an example of the LL function used for the diabetes dataset introduced by Efron et al. (2004). The output will help us understand how to interpret the Linear Lasso algorithm. 
 
-***First step*** : It eliminates variables based on their correlation with the response variable
+***First step*** : LL eliminates predictors based on their correlation with the response variable
 
-***Second step (One-by-one procedure)*** : It eliminates variables based on the one-by-one procedure
+***Second step (One-by-one procedure)*** : LL eliminates variables based on the one-by-one procedure
 
 ```R
 > model.LL = LL(y = diabetes[,11], x = diabetes[,-11], K = 13, L = 50)
 [1] "Variables left after cutoff = 0.2 : BMI + BP + S1 + S3 + S4 + S5 + S6"
 ```
-The variables left after the first step based on the default cutoff ```gamma = 0.2``` are ```BMI```, ```BP```, ```S1```, ```S3```, ```S4```, ```S5``` and ```S6```. The model gives us 
+
+The variables left after the first step based on the default cutoff ```gamma = 0.2``` are ```BMI```, ```BP```, ```S1```, ```S3```, ```S4```, ```S5``` and ```S6```. The model gives us the positive correlations between the response variable and the predictors,
 
 ```R
 > model.LL$c.pos
@@ -58,14 +59,10 @@ The variables left after the first step based on the default cutoff ```gamma = 0
 0.5864501 0.5658826 0.4414818 0.4304529 0.3947893 0.3824835 0.2120225 0.1878888 0.1740536 0.0430620 
 ```
 
+or the table with the cross validated : mean squared errors (MSE.CV), standard deviations (SD.CV) and standard errors (SE.CV) for each rejected variable,
 
 ```R
-> model.LL
-$c.pos
-      BMI        S5        BP        S4        S3        S6        S1       AGE        S2       SEX 
-0.5864501 0.5658826 0.4414818 0.4304529 0.3947893 0.3824835 0.2120225 0.1878888 0.1740536 0.0430620 
-
-$table.MSE
+> model.LL$table.MSE
                            
 Rejected variables in order Length MSE.CV  SD.CV  SE.CV
                         S3       7 0.5178 0.1121 0.0311
@@ -74,12 +71,20 @@ Rejected variables in order Length MSE.CV  SD.CV  SE.CV
                         S1       4 0.5202 0.1126 0.0312
                         BP       3 0.5278 0.1119 0.0310
                         S5       2 0.5458 0.1165 0.0323
-                        BMI      1 0.6740 0.1497 0.0415
+                        BMI      1 0.6740 0.1497 0.0415 
+```
 
-$`Variables with minimum MSE`
+or the final model with the smallest cross validated error,
+
+```R
+> model.LL$`Variables with minimum MSE`
 [1] "BMI" "BP"  "S1"  "S4"  "S5" 
+```
 
-$beta.min
+or the least squares coefficients for the minimum MSE model,
+
+```R
+> model.LL$beta.min
           [,1]
 AGE  0.0000000
 SEX  0.0000000
@@ -91,10 +96,18 @@ S3   0.0000000
 S4  17.6777040
 S5   8.0176759
 S6   0.0000000
+```
 
+or the final model with the 1se standard rule,
+
+```R
 $`Variables with 1se of minimum MSE`
 [1] "BMI" "S5" 
+```
 
+or the least squares coefficients for the 1se standard rule model,
+
+```R
 $beta.1se
         [,1]
 AGE 0.000000
@@ -111,4 +124,5 @@ S6  0.000000
 
 ### Visualization
 
+The following graph 
 ![alt text](diabetes_plot.png)
