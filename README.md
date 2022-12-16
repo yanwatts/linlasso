@@ -16,7 +16,7 @@ Some changes have been made to optimize the algorithm.
 The Linear Lasso algorithm can be run directly from GitHub using the devtools package function ```install_github``` using the following **R** command :
 
 ```R
-devtools::install_github("yanwatts/LinearLasso")
+devtools::install_github("yanwatts/linlasso")
 ```
 
 ## Setup 
