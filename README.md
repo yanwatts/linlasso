@@ -129,7 +129,7 @@ The following graph
 
 ## Author
 
-[Yan Watts](yanwatts@hotmail.com)
+[Yan Watts](mailto:yanwatts@hotmail.com?subject=[GitHub]%20Source%20Han%20Sans)
 
 ## References
 Fraser, D. A., & Bédard, M. (2022). The linear Lasso: A location model approach. The Canadian Journal of Statistics, 50(2), 437-453.
