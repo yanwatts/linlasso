@@ -252,10 +252,10 @@ graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L){
   max.char = max(nchar(row.names(table.MSE)))
   if(minimum == index.1se){
     legend("topleft", legend = "Minimum MSE et 1se MSE",
-           col = 2, pch = 16, cex = 0.8)
+           col = 2, pch = 16)
   }else{
     legend("topleft", legend = c("Minimum MSE", "1se MSE"),
-           pch = c(16,16), col = c(2,3), cex = 0.8)
+           pch = c(16,16), col = c(2,3))
   }
   if(max.char < 4){
     text(MSE, row.names(table.MSE), pos=3, cex = 0.7)
