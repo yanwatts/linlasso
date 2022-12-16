@@ -241,7 +241,8 @@ graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L){
   plot(MSE, pch = 16, cex = 0.5,
        xlab = paste0("Rejected variables in order for the One-by-one procedure (gamma = ",gamma,")"),
        ylab = "MSE",
-       main = "Mean squared error of rejected variables for the One-by-one procedure (Red line indicates final model)",
+       main = "Mean squared error of rejected variables for the One-by-one procedure
+       (Red line indicates final model)",
        col = col,
        ylim = c(min(MSE), max(MSE)+0.1),
        cex.lab = 0.8,
