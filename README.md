@@ -5,7 +5,7 @@ This repository contains code for the Linear Lasso.
 ## Description of the package
 
 This **R** package implements the Linear Lasso which was first used in 
-> Don Fraser and Mylène Bédard. The linear lasso: A location model approach. Canadian Journal of Statistics, 50(2):437–453, 2022
+> Fraser, D. A., & Bédard, M. (2022). The linear Lasso: A location model approach. The Canadian Journal of Statistics, 50(2), 437-453.
 
 Some changes have been made to optimize the algorithm.
 
@@ -128,6 +128,6 @@ The following graph
 ![alt text](diabetes_plot.png)
 
 ## References
-Don Fraser and Mylène Bédard. The linear lasso: A location model approach. Canadian Journal of Statistics, 50(2):437–453, 2022
+Fraser, D. A., & Bédard, M. (2022). The linear Lasso: A location model approach. The Canadian Journal of Statistics, 50(2), 437-453.
 
 Efron, B., Hastie, T., Johnstone, I., & Tibshirani, R. (2004). Least Angle Regression. The Annals of Statistics, 32(2), 407–451.
