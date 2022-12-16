@@ -51,6 +51,7 @@ The following is an example of the LL function used for the diabetes dataset int
 ```
 The variables left after the first step based on the default cutoff ```gamma = 0.2``` are ```BMI```, ```BP```, ```S1```, ```S3```, ```S4```, ```S5``` and ```S6``` 
 
+```R
 > model.LL
 $c.pos
       BMI        S5        BP        S4        S3        S6        S1       AGE        S2       SEX 
