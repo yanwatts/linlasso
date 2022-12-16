@@ -127,6 +127,10 @@ S6  0.000000
 The following graph 
 ![alt text](diabetes_plot.png)
 
+## Author
+
+[Yan Watts](yanwatts@hotmail.com)
+
 ## References
 Fraser, D. A., & Bédard, M. (2022). The linear Lasso: A location model approach. The Canadian Journal of Statistics, 50(2), 437-453.
 
