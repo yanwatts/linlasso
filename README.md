@@ -91,3 +91,5 @@ S4  0.000000
 S5  3.561004
 S6  0.000000
 ```
+
+![alt text](http://url/to/diabetes_plot.png)
