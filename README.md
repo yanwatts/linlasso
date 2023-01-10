@@ -101,14 +101,14 @@ S6   0.0000000
 or the final model with the 1se standard rule,
 
 ```R
-$`Variables with 1se of minimum MSE`
+> model.LL$`Variables with 1se of minimum MSE`
 [1] "BMI" "S5" 
 ```
 
 or the least squares coefficients for the 1se standard rule model,
 
 ```R
-$beta.1se
+> model.LL$beta.1se
         [,1]
 AGE 0.000000
 SEX 0.000000
