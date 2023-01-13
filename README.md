@@ -1,6 +1,6 @@
 # Linear Lasso
 
-This repository contains code for the Linear Lasso. The Linear Lasso is a method used in linear regression that finds the important predictors and calculates it coefficients based on least squares estimation. 
+This repository contains code for the Linear Lasso. The Linear Lasso is a method used in linear regression that finds the important predictors and calculates it coefficients based on least squares estimation. Location model methodology is udes to guide least squares analysis in the Lasso problem of variable selection and inference. In a first step, the Linear Lasso eliminates predictors based on their correlation with the response variable. In the second step (one-by-one procedure), the Linear Lasso uses backward regression with an exclusion critreion based on the variance of the y-content distribution, $c^\top C^{-1}c$.
 
 ## Description of the package
 
