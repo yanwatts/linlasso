@@ -2,8 +2,6 @@
 # Authors : Yan Watts and Mylene Bedard
 # Update : 2023-03-18
 
-library(latex2exp)
-
 stand <- function(data){
 
   data <- as.matrix(data)
@@ -266,7 +264,7 @@ graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L, french){
        (Red line indicates final model)"
   }
   plot(MSE, pch = 16, cex = 0.5,
-       xlab = TeX(paste0("Ordre de sortie des prédicteurs ($\\gamma$ = ", gamma,")")),
+       xlab = paste0("Order in which variables are rejected ($\\gamma$ = ", gamma,")"),
        ylab = "MSE",
        main = main,
        col = col,
