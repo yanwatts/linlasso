@@ -1,5 +1,8 @@
 # Linear Lasso function
 # Authors : Yan Watts and Mylene Bedard
+# Update : 2023-03-18
+
+library(latex2exp)
 
 stand <- function(data){
 
@@ -63,7 +66,15 @@ xlasso_b2 <- function (resp, pred, cj, Cjj, m) {
   # 	m <- m * (m < p-1) + (p-1) * ( m >= (p-1))
   m <- m + (p - 1 - m) * (m >= (p-1))
 
-  LS_list <- list()
+  # Compute the variance term for the complete model
+  var_term <- t(cj) %*% solve(Cjj) %*% cj
+  #	print(var_term)
+
+  # LS estimate full model
+  beta_5 <- solve(t(pred) %*% pred) %*% (t(pred) %*% resp)
+  #	beta_5 <- solve(Cjj*n) %*% (cj*n)
+  LS_list <- list(beta_5)
+
 
   # We start with a vector of 0's. The value 1 will represent the first variable to be discarded from the model (for instance, the value 1 in the 4th position indicates that the 4th variable is the first to exit the model), etc.
   ord <- rep(0, p)
@@ -86,12 +97,18 @@ xlasso_b2 <- function (resp, pred, cj, Cjj, m) {
       pos <- c(pos, (1:p)[cond])
       upd <- (1:p)[-pos]
 
+      # LS estimate of reduced model
+      beta_i <- solve(t(pred[,upd]) %*% pred[,upd]) %*% (t(pred[,upd]) %*% resp)
+      #beta_i <- solve(Cjj[upd, upd]*n) %*% (cj[upd]*n)
+
+      LS_list <- c(LS_list, list(beta_i))
+
     }
   }
 
   # Compute the variance term for the complete model
-  beta_i <- solve(Cjj[upd, upd]*n, cj[upd]*n)
-  LS_list <- list(beta_i)
+  # beta_i <- solve(Cjj[upd, upd]*n, cj[upd]*n)
+  #LS_list <- list(beta_i)
   var_term <- crossprod(cj[upd], solve(Cjj[upd, upd], cj[upd]))
 
   if(m<(p-1)){
@@ -142,14 +159,15 @@ pred_err <- function (L = 10, K = 10, y, pred, m){
   # 	m <- m * (m < p-1) + (p-1) * ( m >= (p-1))
   m <- m + (p - 1 - m) * (m >= (p-1))
 
-  CVMSE_rep = matrix(nrow = L, ncol = p - m)
-  CVSD_rep = matrix(nrow = L, ncol = p - m)
-  CVSE_rep = matrix(nrow = L, ncol = p - m)
+  CVMSE_rep = matrix(nrow = L, ncol = p)
+  CVVAR_rep = matrix(nrow = L, ncol = p)
+  #CVSE_rep = matrix(nrow = L, ncol = p - m)
+
 
   # Complete a total of ? it ? cross-validation cycles
   for(l in 1:L){
 
-    CVMSE <- matrix(nrow=K, ncol = p - m)
+    CVMSE <- matrix(nrow=K, ncol = p)
     #if (l %% 1 == 0) {
     #  cat('Iteration:', l, "\p")
     #}
@@ -180,14 +198,14 @@ pred_err <- function (L = 10, K = 10, y, pred, m){
       fit_i <- xlasso_b2(y_train, cor_i$pred_pos, cor_i$cj_pos, cor_i$Cjj_pos, m)
 
       # Compute the residuals sum of squares for each of the p models (of sizes p to 1)
-      for(j in 1:(p-m)){
+      for(j in 1:p){
 
         # Select the appropriate explanatory variables (according to fit_i)
         # Change the sign of some explanatory vectors to ensure positive correlations with the response
-        pred_test <- matrix(cor_i$modif[sort(fit_i$Pos[(j+m):p])], z, (p+1) - (j+m), byrow=T) * pred[ shuf[idx], sort(fit_i$Pos[(j+m):p])]
+        pred_test <- matrix(cor_i$modif[sort(fit_i$Pos[j:p])], z, (p+1) - j, byrow=T) * pred[ shuf[idx], sort(fit_i$Pos[j:p])]
 
         # Compute the z predictions
-        y_test <- apply(matrix(fit_i$LS_estimates[[(j)]], z, (p+1)-(j+m) , byrow=T) * pred_test, 1, sum)
+        y_test <- apply(matrix(fit_i$LS_estimates[[j]], z, (p+1)- j , byrow=T) * pred_test, 1, sum)
         CVMSE[i,j] <- mean((y[shuf[idx]] - y_test)^2)
         #CVMSE2[j] <- CVMSE2[j] + sum((y[shuf[(i-1)*z + 1:z]] - y_test)^4)
 
@@ -198,14 +216,14 @@ pred_err <- function (L = 10, K = 10, y, pred, m){
     # SD of predictions within one complete cross-validation cycle
     #SD_vec <- c(SD_vec, CVMSE2/n - (CVMSE/n)^2)
     CVMSE_rep[l,] <- apply(CVMSE, 2, mean)
-    CVSD_rep[l,] <- apply(CVMSE, 2, sd)
-    CVSE_rep[l,] <- apply(CVMSE, 2, sd)/sqrt(K)
+    CVVAR_rep[l,] <- apply(CVMSE, 2, var)
+    #CVSE_rep[l,] <- sqrt(CVVAR_rep[l,])/sqrt(K)
 
   }
 
   MSE = apply(CVMSE_rep, 2, mean)
-  SD = apply(CVSD_rep, 2, mean)
-  SE = apply(CVSE_rep, 2, mean)
+  SD = sqrt(apply(CVVAR_rep, 2, mean))
+  SE = SD/sqrt(K)
 
   # SD of predictions between the ? it ? cross-validation cycles
   #SD_MSE <- sqrt(apply(matrix(CVMSE_vec, l, p-m, byrow=T), 2, var))
@@ -228,7 +246,10 @@ beta_full <- function(p, var.left, beta.hat, var.names.x){
   return(beta.hat.matrix)
 }
 
-graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L){
+graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L, french){
+
+
+  #par(mfrow=c(1,1))
 
   minimum <- which.min(MSE)
   col <- c()
@@ -238,11 +259,16 @@ graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L){
     else{col<- c(col, "black")}
   }
 
+  if(french){
+    main = ""
+  }else{
+    main = "Mean squared error of rejected variables for the One-by-one procedure
+       (Red line indicates final model)"
+  }
   plot(MSE, pch = 16, cex = 0.5,
-       xlab = paste0("Rejected variables in order for the One-by-one procedure (gamma = ",gamma,")"),
+       xlab = TeX(paste0("Ordre de sortie des prédicteurs ($\\gamma$ = ", gamma,")")),
        ylab = "MSE",
-       main = "Mean squared error of rejected variables for the One-by-one procedure
-       (Red line indicates final model)",
+       main = main,
        col = col,
        ylim = c(min(MSE), max(MSE)+0.1),
        cex.lab = 0.8,
@@ -265,7 +291,11 @@ graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L){
 }
 
 
-LL <- function(y, x, gamma = 0.2, K = 10, L = 10, cor.only = F, plot = F){
+LL <- function(y, x, gamma = 0.2, K = 10, L = 10, plot = F, french = F, max.cor = F){
+
+  #y = as.matrix(diabetes[,11]) ;  x <- model.matrix( ~ .-1, diabetes[,-11]) ; L = 50 ; gamma = 0.2 ; K = 13 ; cor.only = F
+
+  #y = trim32[,1]; x = trim32[,-1]; L = 10; plot = T ; gamma = 0.2 ; K = 10
 
   x <- as.data.frame(x)
   x <- model.matrix(~., x) ;  x <- x[,-1]
@@ -288,49 +318,53 @@ LL <- function(y, x, gamma = 0.2, K = 10, L = 10, cor.only = F, plot = F){
   #Calculate the correlations of C (between predictors) and c (between predictor and response)
   data_cor <- correl(y.stand, x.stand)
 
-  if(p > n){
+  x.names = colnames(x)
+
+  if(p >= n){
     c <- data_cor$cj_pos
-    c.sort <- sort(data_cor$cj_pos, decreasing = T)
+    #c.sort <- sort(data_cor$cj_pos, decreasing = T)
+    c.sort <- c[order(c[,1],decreasing=T),]
     d = round(n/log(n),0)
-    print(paste("The chosen gamma is", round(c.sort[d],2),"instead of gamma =",gamma,", because of high dimensionnality. This leaves us with", d,"variables for the One-by-one procedure"))
-    gamma = round(c.sort[d],2)
+    #d = round(0.5*n,0)
+    print(paste0("The chosen d is ", d,", because of high dimensionnality. This leaves us with ", d," variables for the Linear Lasso"))
+    gamma.temp = round(c.sort[d],4)
+
+    x.names = colnames(x)
+    idx = which(c > gamma.temp)
+    x.stand <- x.stand[,idx]
+    x.mod <- x[,idx]
+    data_cor <- correl(y.stand, x.stand)
+
+    if(gamma.temp > gamma){
+      gamma = round(gamma.temp,2)
+    }
   }
 
   # Treat categorical data by adding small increment so they are not the same variables
-  if(TRUE %in% duplicated(round(data_cor$cj_pos, 8))){
-    c <- data_cor$cj_pos
-    var.name <- rownames(c)[(1:p)[duplicated(c)]]
-    var.name.sub <- substring(var.name,1,nchar(var.name) - 1)
-    stop(paste(c("Model.matrix was not performed right. Identical variables in design matrix. Variable(s) in question :", var.name.sub), collapse=" "))
-  }
+  #if(TRUE %in% duplicated(round(data_cor$cj_pos, 8))){
+  #  c <- data_cor$cj_pos
+  #  var.name <- rownames(c)[(1:p)[duplicated(c)]]
+  #  var.name.sub <- substring(var.name,1,nchar(var.name) - 1)
+  #  stop(paste(c("Model.matrix was not performed right. Identical variables in design matrix. Variable(s) in question :", var.name.sub), collapse=" "))
+  #}
 
 
   # Error message if the gamma chosen by the user is too high
   #if (gamma > max(data_cor$cj_pos)) stop("The chosen gamma is too high. All coefficients are zero.")
 
   # The m that is chosen by the user with the gamma by correlations
+
   m=sum(data_cor$cj_pos <= gamma)
 
-  # Taking only correlation of y and x for the analysis
-  if(cor.only){
-    # The indexes for which the correlations is bigger than the gamma
-    idx = which(data_cor$cj_pos > gamma)
-    print(paste("The LS estimate using only correlation between response and predictor with gamma =", gamma))
-    x = as.matrix(x)
-    beta.hat <- solve(crossprod(x[,idx]), crossprod(x[,idx], y))
-    beta <- beta_full(p, idx, beta.hat, colnames(x))
-    return(beta.min=beta.min)
-  }
-
   # If the gamma chosen by the user is too high, automatically 0 coefficients
-  if (gamma > max(data_cor$cj_pos)){
-    beta.min = matrix(rep(0,p), nrow = p, ncol = 1)
-    c = c(data_cor$cj_pos)
-    names(c) = colnames(x)
-    rownames(beta.min) = colnames(x)
-    paste("The chosen gamma is too high. All coefficients are zero.")
-    return(list(beta.min = beta.min, c.pos = sort(c, decreasing = T)))
-  }
+  #if (gamma > max(data_cor$cj_pos)){
+  #  beta.min = matrix(rep(0,p), nrow = p, ncol = 1)
+  #  c = c(data_cor$cj_pos)
+  #  names(c) = colnames(x)
+  #  rownames(beta.min) = colnames(x)
+  #  paste("The chosen gamma is too high. All coefficients are zero.")
+  #  return(list(beta.min = beta.min, c.pos = sort(c, decreasing = T)))
+  #}
 
   # Cross-validation to find the optimal variables
   data_CV <- pred_err(L = L, K = K, y=y.stand, pred=x.stand, m=m)
@@ -338,13 +372,15 @@ LL <- function(y, x, gamma = 0.2, K = 10, L = 10, cor.only = F, plot = F){
   # The fit on the whole model with the specified m
   fit <- xlasso_b2(y.stand, data_cor$pred_pos, data_cor$cj_pos, data_cor$Cjj_pos, m=m)
 
+  if(p >= n) p = ncol(x.stand)
+
   # Results
   MSE = data_CV$MSE
   SD = data_CV$SD
   SE = data_CV$SE
   table.MSE <- matrix(nrow = length(MSE), ncol = 4)
   colnames(table.MSE) <- c("Length", "MSE.CV", "SD.CV", "SE.CV")
-  rownames(table.MSE) <- colnames(x)[fit$Pos[(m+1):p]]
+  rownames(table.MSE) <- colnames(x)[fit$Pos[1:p]]
 
   #rownames(table.MSE)<-vec_names
   table.MSE[,1] <- seq(nrow(table.MSE),1,-1)
@@ -361,25 +397,39 @@ LL <- function(y, x, gamma = 0.2, K = 10, L = 10, cor.only = F, plot = F){
   var.left.cutoff <- sort(fit$Pos[(m+1):p])
 
   # The number of variables left with MSE
-  var.left <- sort(fit$Pos[(m+which.min(MSE)):p])
+  var.left <- sort(fit$Pos[which.min(MSE):p])
 
   # The number of variables left with MSE (1se)
-  var.left.1se <- sort(fit$Pos[(m+index.1se):p])
+  var.left.1se <- sort(fit$Pos[index.1se:p])
 
-  x = as.matrix(x)
-  beta.hat.min = solve(t(x[,var.left])%*%x[,var.left])%*%t(x[,var.left])%*%y
-  beta.min <- beta_full(p, var.left, beta.hat.min, colnames(x))
-  beta.hat.1se = solve(t(x[,var.left.1se])%*%x[,var.left.1se])%*%t(x[,var.left.1se])%*%y
-  beta.1se <- beta_full(p, var.left.1se, beta.hat.1se, colnames(x))
+  if(ncol(x) >= n){
 
-  c = c(data_cor$cj_pos)
-  names(c) = colnames(x)
+    x.mod = as.matrix(x.mod)
+    beta.hat.min = solve(t(x.mod[,var.left])%*%x.mod[,var.left])%*%t(x.mod[,var.left])%*%y
+    beta.min <- beta_full(ncol(x), var.left, beta.hat.min, x.names)
+    beta.hat.1se = solve(t(x.mod[,var.left.1se])%*%x.mod[,var.left.1se])%*%t(x.mod[,var.left.1se])%*%y
+    beta.1se <- beta_full(ncol(x), var.left.1se, beta.hat.1se, x.names)
 
-  if(plot) graph.one.by.one(MSE, gamma, index.1se, table.MSE, K, L)
+    c = c(data_cor$cj_pos)
+    names(c) = colnames(x.mod)
+  }else{
+    x = as.matrix(x)
+    beta.hat.min = solve(t(x[,var.left])%*%x[,var.left])%*%t(x[,var.left])%*%y
+    beta.min <- beta_full(p, var.left, beta.hat.min, x.names)
+    beta.hat.1se = solve(t(x[,var.left.1se])%*%x[,var.left.1se])%*%t(x[,var.left.1se])%*%y
+    beta.1se <- beta_full(p, var.left.1se, beta.hat.1se, x.names)
 
-  print(paste("Variables left after cutoff =", gamma, ":", paste(colnames(x)[var.left.cutoff], collapse = " + ")))
+    c = c(data_cor$cj_pos)
+    names(c) = x.names
+  }
+
+
+  if(plot) graph.one.by.one(MSE, gamma, index.1se, table.MSE, K, L, french)
+
+  #print(paste("Variables with inferior correlation to gamma =", gamma, ":", paste(colnames(x)[var.left.cutoff], collapse = " + ")))
   #print(paste(c("Variables left after cutoff =", gamma, "are", colnames(x)[var.left.cutoff]), collapse=" ", sep = "\n"))
-  return(list(c.pos = sort(c, decreasing = T),
+  return(list(m=m, gamma=gamma,
+              c.pos = sort(c, decreasing = T),
               table.MSE = table.MSE,
               "Variables with minimum MSE" = colnames(x)[var.left],
               beta.min = beta.min,
@@ -388,3 +438,7 @@ LL <- function(y, x, gamma = 0.2, K = 10, L = 10, cor.only = F, plot = F){
 
 }
 
+#crime_data = read.csv( "C:\\Users\\waya7500\\Desktop\\Memoire\\Code R\\Exemples\\Datasets\\crime_data.txt",sep = "")
+#crime_data = crime_data[,-2]
+#y = crime_data[,1] ; x = crime_data[,2:6] ; L = 10 ; gamma = 0.2 ; K = 3 ; cor.only = F
+#LL(y,x, K = 10, L = 50)
