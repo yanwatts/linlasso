@@ -286,7 +286,7 @@ graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L, french.plot
 }
 
 
-LL <- function(y, x, gamma = 0.2, K = 10, L = 10, plot = F, french.plot = F, max.cor = F){
+LL <- function(y, x, gamma = 0.1, K = 10, L = 5, plot = F, french.plot = F){
 
   #y = as.matrix(diabetes[,11]) ;  x <- model.matrix( ~ .-1, diabetes[,-11]) ; L = 50 ; gamma = 0.2 ; K = 13 ; cor.only = F
 
@@ -398,7 +398,7 @@ LL <- function(y, x, gamma = 0.2, K = 10, L = 10, plot = F, french.plot = F, max
   if(plot){graph.one.by.one(MSE, gamma, index.1se, table.MSE, K, L, french.plot)}
 
   #print(paste("Variables with inferior correlation to gamma =", gamma, ":", paste(colnames(x)[var.left.cutoff], collapse = " + ")))
-  #print(paste(c("Variables left after cutoff =", gamma, "are", colnames(x)[var.left.cutoff]), collapse=" ", sep = "\n"))
+  print(paste(c("Variables chosen for One-by-one procedure with gamma =", gamma, "are", colnames(x)[var.left.cutoff]), collapse=" ", sep = "\n"))
   return(list(m=m, gamma=gamma,
               c.pos = sort(c, decreasing = T),
               table.MSE = table.MSE,
