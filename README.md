@@ -40,7 +40,7 @@ The LL function requires minimally the following input :
 * ```K``` : the number of folds for the repeated cross validation (default = 10);
 * ```L``` : the number of repetitions for the repeated cross validation (default = 5);
 * ```plot``` : plot giving the path of the final model after the one-by-one procedure.
-* ```french.plot``` : plot giving the path of the final model after the one-by-one procedure.
+* ```french.plot``` : plot in french.
 
 ## Output 
 
