@@ -1,6 +1,6 @@
 # Linear Lasso function
 # Authors : Yan Watts and Mylene Bedard
-# Update : 2023-03-18
+# Update : 2023-04-11
 
 stand <- function(data){
 
