@@ -40,7 +40,7 @@ The LL function requires minimally the following input :
 * ```K``` : the number of folds for the repeated cross validation (default = 10);
 * ```L``` : the number of repetitions for the repeated cross validation (default = 5);
 * ```plot``` : plot giving the path of the final model after the one-by-one procedure.
-* ```french.plot``` : plot giving the path of the final model after the one-by-one procedure.
+* ```french.plot``` : plot in french.
 
 ## Output 
 
@@ -132,6 +132,9 @@ S6   0.000000000
 ### Visualization
 
 The following graph plots the One-by-one procedure. The first variable to exit the model after step one is ```S3```. The variables are rejected one at a time until there is only one variable left in the procedure (```BMI```).  The red line indicates the final model of the LL algorithm. 
+
+
+![alt text](diabetes_plot.png)
 
 
 ## Author
