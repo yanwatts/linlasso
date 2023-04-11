@@ -1,6 +1,10 @@
 # Linear Lasso
+This repository contains code for the Linear Lasso. The Linear Lasso is a method used in linear regression that finds the important predictors and calculates it coefficients based on least squares estimation. 
 
-This repository contains code for the Linear Lasso. The Linear Lasso is a method used in linear regression that finds the important predictors and calculates it coefficients based on least squares estimation. Location model methodology is udes to guide least squares analysis in the Lasso problem of variable selection and inference. In a first step, the Linear Lasso eliminates predictors based on their correlation with the response variable. In the second step (one-by-one procedure), the Linear Lasso uses backward regression with an exclusion critreion based on the variance of the y-content distribution, $c^\top C^{-1}c$. The variable leading to the smallest decrease in the variance term $c^\top C^{-1}c$ is removed from the model. Repeated $K$-fold cross-calidation is used to fin the best subset model leading to the samllest mean squared error $(MSE)$.
+The response vector is then seen as the focal point of the space and all other explanatory variables vectors orbit around the response vector. The angles formed between the response vector and the explanatory variables are assumed to be fixed, and will be used as a basis for constructing the method. The information contained in the explanatory variables is projected onto the response vector. The theory of normal linear models allows us to use ordinary least squares (OLS) for the coefficients of the Linear Lasso.
+
+The Linear Lasso (LL) is performed in two steps. First, variables are dropped from the model based on their correlation with the response variable; the number of variables dropped (or ordered) in this step depends on a tuning parameter $\gamma$. Then, an exclusion criterion based on the variance of the distribution of the response variable is introduced to remove (or order) the remaining variables. A repeated cross-validation guides us in the choice of the final model
+
 
 ## Description of the package
 
@@ -23,7 +27,7 @@ devtools::install_github("yanwatts/linlasso")
 
 To use the Lineal Lasso in linear regression, the LL function is available by specifying certain parameters
 ```R
-LL(y, x, gamma = 0.2, K = 10, L = 10, cor.only = F, plot = F)
+LL(y, x, gamma = 0.1, K = 10, L = 5, plot = F, french.plot = F)
 ```
 
 ## Input 
@@ -32,22 +36,22 @@ The LL function requires minimally the following input :
 
 * ```y``` : the vector of responses;
 * ```x``` : the design matrix;
-* ```gamma``` : the cutoff parameter;
-* ```K``` : the number of folds for the repeated cross validation;
-* ```L``` : the number of repetitions for the repeated cross validation;
-* ```cor.only``` : algorithm executed only with correlations between y and x;
+* ```gamma``` : the cutoff parameter (default = 0.1);
+* ```K``` : the number of folds for the repeated cross validation (default = 10);
+* ```L``` : the number of repetitions for the repeated cross validation (default = 5);
 * ```plot``` : plot giving the path of the final model after the one-by-one procedure.
+* ```french.plot``` : plot giving the path of the final model after the one-by-one procedure.
 
 ## Output 
 
-The following is an example of the LL function used for the diabetes dataset introduced by Efron et al. (2004). The output will help us understand how to interpret the Linear Lasso algorithm. 
+The following is an example of the LL function used for the diabetes dataset introduced by Efron et al. (2004). The output will help us understand how to interpret the Linear Lasso algorithm. We use gamma = 0.2 for illustration purposes. The SEX variable is recoded to 1 and 0.
 
 **First step** : LL eliminates predictors based on their correlation with the response variable
 
 **Second step (One-by-one procedure)** : LL eliminates variables based on the one-by-one procedure
 
 ```R
-> model.LL = LL(y = diabetes[,11], x = diabetes[,-11], K = 13, L = 50)
+> model.LL = LL(y = diabetes[,11], x = diabetes[,-11], gamma = 0.2, K = 13, L = 50, plot = T)
 [1] "Variables left after cutoff = 0.2 : BMI + BP + S1 + S3 + S4 + S5 + S6"
 ```
 
@@ -65,68 +69,70 @@ or the table with the cross validated : mean squared errors (MSE.CV), standard d
 > model.LL$table.MSE
                            
 Rejected variables in order Length MSE.CV  SD.CV  SE.CV
-                        S3       7 0.5178 0.1121 0.0311
-                        S6       6 0.5191 0.1119 0.0310
-                        S4       5 0.5171 0.1125 0.0312
-                        S1       4 0.5202 0.1126 0.0312
-                        BP       3 0.5278 0.1119 0.0310
-                        S5       2 0.5458 0.1165 0.0323
-                        BMI      1 0.6740 0.1497 0.0415 
+                        SEX     10 0.5042 0.1122 0.0311
+                        S2       9 0.5199 0.1095 0.0304
+                        AGE      8 0.5189 0.1089 0.0302
+                        S3       7 0.5176 0.1092 0.0303
+                        S6       6 0.5189 0.1091 0.0302
+                        S4       5 0.5169 0.1092 0.0303
+                        S1       4 0.5199 0.1099 0.0305
+                        BP       3 0.5283 0.1088 0.0302
+                        S5       2 0.5455 0.1136 0.0315
+                        BMI      1 0.6768 0.1446 0.0401
 ```
 
 or the final model with the smallest cross validated error,
 
 ```R
 > model.LL$`Variables with minimum MSE`
-[1] "BMI" "BP"  "S1"  "S4"  "S5" 
+ [1] "AGE" "SEX" "BMI" "BP"  "S1"  "S2"  "S3"  "S4"  "S5"  "S6" 
 ```
 
 or the least squares coefficients for the minimum MSE model,
 
 ```R
 > model.LL$beta.min
-          [,1]
-AGE  0.0000000
-SEX  0.0000000
-BMI  4.6706804
-BP   0.3029707
-S1  -0.5612210
-S2   0.0000000
-S3   0.0000000
-S4  17.6777040
-S5   8.0176759
-S6   0.0000000
+            [,1]
+AGE  0.009746087
+SEX 20.801686649
+BMI  5.417986348
+BP   0.961537161
+S1   1.635507013
+S2  -1.604358783
+S3  -3.536258970
+S4  -7.741258450
+S5  -3.598309289
+S6   0.080981765
 ```
 
 or the final model with the 1se standard rule,
 
 ```R
 > model.LL$`Variables with 1se of minimum MSE`
-[1] "BMI" "S5" 
+[1] "BMI" "BP"  "S5" 
 ```
 
 or the least squares coefficients for the 1se standard rule model,
 
 ```R
 > model.LL$beta.1se
-        [,1]
-AGE 0.000000
-SEX 0.000000
-BMI 5.274831
-BP  0.000000
-S1  0.000000
-S2  0.000000
-S3  0.000000
-S4  0.000000
-S5  3.561004
-S6  0.000000
+            [,1]
+AGE  0.000000000
+SEX  0.000000000
+BMI  5.281323909
+BP  -0.005810611
+S1   0.000000000
+S2   0.000000000
+S3   0.000000000
+S4   0.000000000
+S5   3.642028932
+S6   0.000000000
 ```
 
 ### Visualization
 
 The following graph plots the One-by-one procedure. The first variable to exit the model after step one is ```S3```. The variables are rejected one at a time until there is only one variable left in the procedure (```BMI```).  The red line indicates the final model of the LL algorithm. 
 
-![alt text](diabetes_plot.png)
 
 ## Author
 
