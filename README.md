@@ -1,6 +1,10 @@
 # Linear Lasso
+This repository contains code for the Linear Lasso. The Linear Lasso is a method used in linear regression that finds the important predictors and calculates it coefficients based on least squares estimation. 
 
-This repository contains code for the Linear Lasso. The Linear Lasso is a method used in linear regression that finds the important predictors and calculates it coefficients based on least squares estimation. Location model methodology is udes to guide least squares analysis in the Lasso problem of variable selection and inference. In a first step, the Linear Lasso eliminates predictors based on their correlation with the response variable. In the second step (one-by-one procedure), the Linear Lasso uses backward regression with an exclusion critreion based on the variance of the y-content distribution, $c^\top C^{-1}c$. The variable leading to the smallest decrease in the variance term $c^\top C^{-1}c$ is removed from the model. Repeated $K$-fold cross-calidation is used to fin the best subset model leading to the samllest mean squared error $(MSE)$.
+The response vector is then seen as the focal point of the space and all other explanatory variables vectors orbit around the response vector. The angles formed between the response vector and the explanatory variables are assumed to be fixed, and will be used as a basis for constructing the method. The information contained in the explanatory variables is projected onto the response vector. The theory of normal linear models allows us to use ordinary least squares (OLS) for the coefficients of the Linear Lasso.
+
+The Linear Lasso (LL) is performed in two steps. First, variables are dropped from the model based on their correlation with the response variable; the number of variables dropped (or ordered) in this step depends on a tuning parameter $\gamma$. Then, an exclusion criterion based on the variance of the distribution of the response variable is introduced to remove (or order) the remaining variables. A repeated cross-validation guides us in the choice of the final model
+
 
 ## Description of the package
 
@@ -35,8 +39,8 @@ The LL function requires minimally the following input :
 * ```gamma``` : the cutoff parameter;
 * ```K``` : the number of folds for the repeated cross validation;
 * ```L``` : the number of repetitions for the repeated cross validation;
-* ```cor.only``` : algorithm executed only with correlations between y and x;
 * ```plot``` : plot giving the path of the final model after the one-by-one procedure.
+* ```french.plot``` : plot giving the path of the final model after the one-by-one procedure.
 
 ## Output 
 
@@ -47,7 +51,7 @@ The following is an example of the LL function used for the diabetes dataset int
 **Second step (One-by-one procedure)** : LL eliminates variables based on the one-by-one procedure
 
 ```R
-> model.LL = LL(y = diabetes[,11], x = diabetes[,-11], K = 13, L = 50)
+> model = LL(y = diabetes[,11], x = diabetes[,-11], gamma = 0.2, K = 13, L = 50, plot = T)
 [1] "Variables left after cutoff = 0.2 : BMI + BP + S1 + S3 + S4 + S5 + S6"
 ```
 
