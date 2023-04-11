@@ -131,7 +131,7 @@ S6   0.000000000
 
 ### Visualization
 
-The following graph plots the One-by-one procedure. The first variable to exit the model after step one is ```S3```. The variables are rejected one at a time until there is only one variable left in the procedure (```BMI```).  The red line indicates the final model of the LL algorithm. 
+The following graph plots the One-by-one procedure. The final model is the one with the red line. We can see that basically all variables are kept in the model. A more parcimonious model can be choosen by going at the green point (1se standard rule) and to follow the red line to the right.  
 
 
 ![alt text](diabetes_plot.png)
