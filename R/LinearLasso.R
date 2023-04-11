@@ -56,8 +56,6 @@ correl <- function(resp, pred) {
 
 xlasso_b2 <- function (resp, pred, cj, Cjj, m) {
 
-  #resp=y.stand ; pred=x.stand ; m=sum(data_cor$cj_pos <= gamma) ; cj = data_cor$cj_pos ; Cjj= data_cor$Cjj_pos
-
   n <- nrow(pred)
   p <- ncol(pred)
 
@@ -149,8 +147,6 @@ xlasso_b2 <- function (resp, pred, cj, Cjj, m) {
 
 pred_err <- function (L = 10, K = 10, y, pred, m){
 
-  #y=y.stand ; pred=x.stand ; m=sum(data_cor$cj_pos <= gamma)
-
   n <- nrow(pred)
   p <- ncol(pred)
 
@@ -159,8 +155,6 @@ pred_err <- function (L = 10, K = 10, y, pred, m){
 
   CVMSE_rep = matrix(nrow = L, ncol = p)
   CVVAR_rep = matrix(nrow = L, ncol = p)
-  #CVSE_rep = matrix(nrow = L, ncol = p - m)
-
 
   # Complete a total of ? it ? cross-validation cycles
   for(l in 1:L){
@@ -244,8 +238,7 @@ beta_full <- function(p, var.left, beta.hat, var.names.x){
   return(beta.hat.matrix)
 }
 
-graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L, french){
-
+graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L, french.plot){
 
   #par(mfrow=c(1,1))
 
@@ -257,14 +250,17 @@ graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L, french){
     else{col<- c(col, "black")}
   }
 
-  if(french){
-    main = ""
+  if(french.plot){
+    main = "Erreur quadratique moyenne des variables rejetées pour la procédure un à un
+    (La ligne rouge indique le modèle final)"
+    xlabel = paste0("Ordre de rejet des variables (gamma = ", gamma,")")
   }else{
     main = "Mean squared error of rejected variables for the One-by-one procedure
        (Red line indicates final model)"
+    xlabel = paste0("Order in which variables are rejected (gamma = ", gamma,")")
   }
   plot(MSE, pch = 16, cex = 0.5,
-       xlab = paste0("Order in which variables are rejected (gamma = ", gamma,")"),
+       xlab = xlabel,
        ylab = "MSE",
        main = main,
        cex.main = 0.8,
@@ -290,7 +286,7 @@ graph.one.by.one <- function(MSE, gamma, index.1se, table.MSE, K, L, french){
 }
 
 
-LL <- function(y, x, gamma = 0.2, K = 10, L = 10, plot = F, french = F, max.cor = F){
+LL <- function(y, x, gamma = 0.2, K = 10, L = 10, plot = F, french.plot = F, max.cor = F){
 
   #y = as.matrix(diabetes[,11]) ;  x <- model.matrix( ~ .-1, diabetes[,-11]) ; L = 50 ; gamma = 0.2 ; K = 13 ; cor.only = F
 
@@ -339,31 +335,7 @@ LL <- function(y, x, gamma = 0.2, K = 10, L = 10, plot = F, french = F, max.cor 
     }
   }
 
-  # Treat categorical data by adding small increment so they are not the same variables
-  #if(TRUE %in% duplicated(round(data_cor$cj_pos, 8))){
-  #  c <- data_cor$cj_pos
-  #  var.name <- rownames(c)[(1:p)[duplicated(c)]]
-  #  var.name.sub <- substring(var.name,1,nchar(var.name) - 1)
-  #  stop(paste(c("Model.matrix was not performed right. Identical variables in design matrix. Variable(s) in question :", var.name.sub), collapse=" "))
-  #}
-
-
-  # Error message if the gamma chosen by the user is too high
-  #if (gamma > max(data_cor$cj_pos)) stop("The chosen gamma is too high. All coefficients are zero.")
-
-  # The m that is chosen by the user with the gamma by correlations
-
   m=sum(data_cor$cj_pos <= gamma)
-
-  # If the gamma chosen by the user is too high, automatically 0 coefficients
-  #if (gamma > max(data_cor$cj_pos)){
-  #  beta.min = matrix(rep(0,p), nrow = p, ncol = 1)
-  #  c = c(data_cor$cj_pos)
-  #  names(c) = colnames(x)
-  #  rownames(beta.min) = colnames(x)
-  #  paste("The chosen gamma is too high. All coefficients are zero.")
-  #  return(list(beta.min = beta.min, c.pos = sort(c, decreasing = T)))
-  #}
 
   # Cross-validation to find the optimal variables
   data_CV <- pred_err(L = L, K = K, y=y.stand, pred=x.stand, m=m)
@@ -423,7 +395,7 @@ LL <- function(y, x, gamma = 0.2, K = 10, L = 10, plot = F, french = F, max.cor 
   }
 
 
-  if(plot) graph.one.by.one(MSE, gamma, index.1se, table.MSE, K, L, french)
+  if(plot){graph.one.by.one(MSE, gamma, index.1se, table.MSE, K, L, french.plot)}
 
   #print(paste("Variables with inferior correlation to gamma =", gamma, ":", paste(colnames(x)[var.left.cutoff], collapse = " + ")))
   #print(paste(c("Variables left after cutoff =", gamma, "are", colnames(x)[var.left.cutoff]), collapse=" ", sep = "\n"))
@@ -436,8 +408,3 @@ LL <- function(y, x, gamma = 0.2, K = 10, L = 10, plot = F, french = F, max.cor 
               beta.1se = beta.1se))
 
 }
-
-#crime_data = read.csv( "C:\\Users\\waya7500\\Desktop\\Memoire\\Code R\\Exemples\\Datasets\\crime_data.txt",sep = "")
-#crime_data = crime_data[,-2]
-#y = crime_data[,1] ; x = crime_data[,2:6] ; L = 10 ; gamma = 0.2 ; K = 3 ; cor.only = F
-#LL(y,x, K = 10, L = 50)
